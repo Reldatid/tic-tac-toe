@@ -1,0 +1,12 @@
+header{
+  margin: 10px 0px;
+  align-content: center;
+}
+
+h1{
+  text-align: center;
+}
+
+#gameContainer{
+  margin: 10px auto;
+}
