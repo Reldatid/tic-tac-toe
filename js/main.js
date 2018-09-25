@@ -1,23 +1,42 @@
 console.log('Working!');
 
-let cells = [];
+const cells = [];
+let playerTurn = 'O';
 
 $(document).ready(function(){
   //3+ layers has problems with formatting. Could be solved with an intermediary div to position it at 33.33% then the 'Cell' can be centered in it at ~90% size.
-  makeGame(3);
+  //on second thought, any nesting is badly formatted.
+  makeGame(2);
 })
 
 const makeGame = function(layers){
   const gameBoard = {
     $div: $('<div class="topBoard"></div>'),
     $grid: $('<img src="images/tictactoeBoard.png" />'),
+    playerClaims: {
+      claimedO: {
+        x0: 0,
+        x1: 0,
+        x2: 0,
+        y0: 0,
+        y1: 0,
+        y2: 0,
+        d1: 0,
+        d2: 0,
+      },
+      claimedX: {
+        x0: 0,
+        x1: 0,
+        x2: 0,
+        y0: 0,
+        y1: 0,
+        y2: 0,
+        d1: 0,
+        d2: 0,
+      },
+    },
   }
-  gameBoard.$div.css({
-    width: '100%',
-    height: '100%',
-    position: 'absolute',
-    'z-index': -layers,
-  });
+  gameBoard.$div.css({'z-index': -layers,});
   nextLayer = layers-1;
   for(let i = 0; i < 3; i ++){
     for (let j = 0; j < 3; j ++){
@@ -32,30 +51,48 @@ const Cell = function(layer, parent, coOrdinates){
   this.layer = layer;
   this.parent = parent;
   this.coOrdinates = coOrdinates;
-  this.$div = $(`<div class="cell">`)
+  this.claimer;
+  this.$div = $(`<div class="cell">`);
+  this.$div.css({
+    left: `${33.33*coOrdinates[0]}%`,
+    top: `${33.33*coOrdinates[1]}%`,
+    'z-index': -layer,
+  });
 
   if (layer === 0 ){
     this.index = cells.length;
     cells.push(this);
     this.$div.attr('id', `${this.index}`);
-    this.$div.css({
-      left: `${33.33*coOrdinates[0]}%`,
-      top: `${33.33*coOrdinates[1]}%`,
-      'z-index': layer,
-    });
     this.$div.on('click', function(){
       let id = $(this).attr('id');
       gameLoop(id);
     })
   } else {
-    this.$div.css({
-      left: `${33.33*coOrdinates[0]}%`,
-      top: `${33.33*coOrdinates[1]}%`,
-      'z-index': -layer,
-    });
     const $grid =  $('<img src="images/tictactoeBoard.png" />');
     this.$div.append($grid);
     this.newLayer = layer-1;
+    this.playerClaims = {
+      claimedO: {
+        x0: 0,
+        x1: 0,
+        x2: 0,
+        y0: 0,
+        y1: 0,
+        y2: 0,
+        d1: 0,
+        d2: 0,
+      },
+      claimedX: {
+        x0: 0,
+        x1: 0,
+        x2: 0,
+        y0: 0,
+        y1: 0,
+        y2: 0,
+        d1: 0,
+        d2: 0,
+      },
+    };
     for(let i = 0; i < 3; i ++){
       for (let j = 0; j < 3; j ++){
         const newCell = new Cell(this.newLayer, this, `${j}${i}`);
@@ -65,7 +102,43 @@ const Cell = function(layer, parent, coOrdinates){
   parent.$div.append(this.$div);
 };
 
+Cell.prototype.updateImage = function(id){
+  $image = $(`<img src="images/${this.claimer}.png" />`);
+  $(`#${id}`).append($image);
+};
 
 const gameLoop = function(clickedId){
+  thisCell = cells[clickedId];
+  if ( thisCell.claimer ){
+    alert('OI! \nThat square is already taken, get your own.')
+  }else{
+    thisCell.claimer = playerTurn;
+    thisCell.updateImage(clickedId);
+    trackClaims(clickedId);
+    checkForWin(clickedId);
+  }
+};
+
+const trackClaims = function(id){
+  // const board = Math.floor(id/9);
+  clickedCell = cells[id];
+  coOrdinates = clickedCell.coOrdinates;
+  x = parseInt(coOrdinates[0]);
+  y = parseInt(coOrdinates[1]);
+  claims = clickedCell.parent.playerClaims[`claimed${playerTurn}`];
+  claims[`x${x}`] ++;
+  claims[`y${y}`] ++;
+  if( (x+y)%2 === 0 ){
+    if( x === y ){
+      claims.d1 ++;
+    }
+    if(x+y === 2)
+    {
+      claims.d2 ++;
+    }
+  }
+};
+
+const checkForWin = function(id){
 
 }
