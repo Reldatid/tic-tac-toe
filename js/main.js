@@ -35,6 +35,15 @@ const makeGame = function(layers){
         d2: 0,
       },
     },
+    checkForWin: function(id){
+
+      const x = parseInt(id[0]);
+      const y = parseInt(id[1]);
+      const claims = this.playerClaims[`claimed${playerTurn}`];
+      if ( (claims[`x${x}`] === 3) || (claims[`y${y}`] === 3) || (claims.d1 === 3) || (claims.d2 === 3) ){
+        alert(`${playerTurn} wins`);
+      }
+    },
   }
   gameBoard.$div.css({'z-index': -layers,});
   nextLayer = layers-1;
@@ -107,6 +116,19 @@ Cell.prototype.updateImage = function(id){
   $(`#${id}`).append($image);
 };
 
+Cell.prototype.checkForWin = function(id){
+  const x = parseInt(id[0]);
+  const y = parseInt(id[1]);
+  const claims = this.playerClaims[`claimed${playerTurn}`];
+  if ( (claims[`x${x}`] === 3) || (claims[`y${y}`] === 3) || (claims.d1 === 3) || (claims.d2 === 3) ){
+    this.claimer = playerTurn;
+    this.updateImage(id);
+    // this.div.css('z-index': 0);
+    parent.checkForWin;
+    return;
+  }
+}
+
 const gameLoop = function(clickedId){
   thisCell = cells[clickedId];
   if ( thisCell.claimer ){
@@ -117,11 +139,13 @@ const gameLoop = function(clickedId){
     trackClaims(clickedId);
     checkForWin(clickedId);
   }
+  // Toggle the playerTurn.
+  playerTurn = (playerTurn === 'X') ? 'O' : 'X';
 };
 
-const trackClaims = function(id){
+const trackClaims = function(claimedId){
   // const board = Math.floor(id/9);
-  clickedCell = cells[id];
+  clickedCell = cells[claimedId];
   coOrdinates = clickedCell.coOrdinates;
   x = parseInt(coOrdinates[0]);
   y = parseInt(coOrdinates[1]);
@@ -139,6 +163,10 @@ const trackClaims = function(id){
   }
 };
 
-const checkForWin = function(id){
+const checkForWin = function(claimedId){
+  console.log(claimedId);
+  claimedCell = cells[claimedId];
+  coOrdinates = claimedCell.coOrdinates;
+  claimedCell.parent.checkForWin(coOrdinates);
 
 }
