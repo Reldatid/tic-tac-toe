@@ -43,7 +43,7 @@ img{
   height: 33.33%;
 }
 .cell:hover{
-  border: 2px solid red;
+  border: 1px solid red;
 }
 
 .topBoard{

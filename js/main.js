@@ -4,18 +4,20 @@ const cells = [];
 let playerTurn = 'O';
 let nextTurn = '';
 let lastTurn = '';
+const layers = 2;
+let gameBoard;
 
 $(document).ready(function(){
   //3+ layers has problems with formatting. Could be solved with an intermediary div to position it at 33.33% then the 'Cell' can be centered in it at ~90% size.
   //on second thought, any nesting is badly formatted.
-  makeGame(2);
+  makeGame(layers);
 })
 
 const makeGame = function(layers){
-  const gameBoard = {
+  gameBoard = {
     $div: $('<div class="topBoard"></div>'),
     $grid: $('<img src="images/tictactoeBoard.png" />'),
-    layers: {},
+    cells: {},
     playerClaims: {
       claimedO: {
         x0: 0,
@@ -41,18 +43,16 @@ const makeGame = function(layers){
     checkForWin: function(coOrdinates){
       const x = parseInt(coOrdinates[0]);
       const y = parseInt(coOrdinates[1]);
-      console.log(x,y);
       const claims = this.playerClaims[`claimed${playerTurn}`];
-      console.log(claims);
       if ( (claims[`x${x}`] === 3) || (claims[`y${y}`] === 3) || (claims.d1 === 3) || (claims.d2 === 3) ){
         alert(`${playerTurn} wins`);
         this.$div.append($(`<img src="images/${playerTurn}.png" />`));
+        this.claimer = playerTurn;
       }
     },
   }
   for (let i = 0; i < this.layers; i ++){
     this.layers[`i`] = {};
-
   }
   gameBoard.$div.css({'z-index': -layers,});
   nextLayer = layers-1;
@@ -74,7 +74,7 @@ const Cell = function(layer, parent, coOrdinates){
   this.$div.css({
     left: `${33.33*coOrdinates[0]}%`,
     top: `${33.33*coOrdinates[1]}%`,
-    'z-index': -layer,
+    // 'z-index': -layer,
   });
 
   if (layer === 0 ){
@@ -87,7 +87,9 @@ const Cell = function(layer, parent, coOrdinates){
     })
   } else {
     const $grid =  $('<img src="images/tictactoeBoard.png" />');
+    this.$div.attr('id', `${this.coOrdinates}`)
     this.$div.append($grid);
+    this.cells = {};
     this.newLayer = layer-1;
     this.numberOfClaims = 0;
     this.playerClaims = {
@@ -119,6 +121,7 @@ const Cell = function(layer, parent, coOrdinates){
     }
   }
   parent.$div.append(this.$div);
+  parent.cells[coOrdinates] = this;
 };
 
 Cell.prototype.updateImage = function(){
@@ -137,7 +140,6 @@ Cell.prototype.checkForWin = function(coOrdinates){
   const x = parseInt(coOrdinates[0]);
   const y = parseInt(coOrdinates[1]);
   const claims = this.playerClaims[`claimed${playerTurn}`];
-  console.log(this.numberOfClaims);
   if (this.numberOfClaims < 9){
     if ( (claims[`x${x}`] === 3) || (claims[`y${y}`] === 3) || (claims.d1 === 3) || (claims.d2 === 3) ){
       this.claimer = playerTurn;
@@ -157,18 +159,21 @@ Cell.prototype.checkForWin = function(coOrdinates){
 
 const gameLoop = function(clickedId){
   thisCell = cells[clickedId];
+  coOrds = thisCell.coOrdinates;
   if ( thisCell.claimer || thisCell.parent.claimer){
     alert('OI! \nThat square is already taken, get your own.')
     return;
   } else if (thisCell.parent.coOrdinates === nextTurn || nextTurn === ''){
     thisCell.claimer = playerTurn;
     thisCell.updateImage(clickedId);
-    //DOESNT WORK YET
-    nextTurn = (thisCell.parent.claimed) ? '' : thisCell.coOrdinates;
-    //DOESNT WORK YET
-    console.log(nextTurn);
     trackClaims(thisCell);
     thisCell.parent.checkForWin(thisCell.coOrdinates);
+    if (layers > 1){
+      console.log(coOrds);
+      console.log(thisCell.parent.parent.cells[coOrds].claimer);
+      nextTurn = (thisCell.parent.parent.cells[coOrds].claimer) ? '' : coOrds;
+      console.log(nextTurn);
+    }
     // Toggle the playerTurn.
     playerTurn = (playerTurn === 'X') ? 'O' : 'X';
   } else {
@@ -182,10 +187,8 @@ const trackClaims = function(cell){
   x = parseInt(coOrdinates[0]);
   y = parseInt(coOrdinates[1]);
   currentCell.parent.numberOfClaims ++;
-  console.log(cell.claimer);
   if (cell.claimer === 'both'){
     for (let key in currentCell.parent.playerClaims){
-      console.log(key);
       claims = currentCell.parent.playerClaims[key];
       claims[`x${x}`] ++;
       claims[`y${y}`] ++;
