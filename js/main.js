@@ -1,7 +1,8 @@
 console.log('hoy');
-const layers = 3;
-const activeBranch = '0';
+const layers = 2;
 const cellObjs = [];
+let activeBranch = '0';
+let nextBranch = '0';
 let treeTop;
 let playerTurn = 'O';
 let winner = 'none';
@@ -89,7 +90,9 @@ Cell.prototype.wasClicked = function(){
   if (this.claimer){
     console.log("This cell has already been claimed.");
   }else{
-    this.claimThis(playerTurn);
+    // if (this.branch.substring(0, activeBranch.length) === activeBranch){
+      this.claimThis(playerTurn);
+    //}
   }
 }
 
@@ -99,7 +102,7 @@ Cell.prototype.claimThis = function(claimer){
     this.parent.trackClaims(this.coOrds, claimer);
     this.parent.checkForWin(this.coOrds);
     this.claimCascade();
-    this.shiftBranch(this.branch);
+    this.shiftBranch();
   } else {
     winner = claimer;
     gameOver = true;
@@ -150,8 +153,18 @@ Cell.prototype.trackClaims = function(coOrds, claimer){
 };
 
 Cell.prototype.shiftBranch = function(){
-  const depth = layers - this.layer;
-
+  // const layer = this.layer;
+  // const currentDepth = layers - this.layer;
+  // if(depth > 1){
+  //   const branchArray = this.branch.split('');
+  //   const activebranchArray = activeBranch.split('');
+  //   let nextBranchArray = [0];
+  //   for ( let i = 1; i < currentDepth-1 ; i++ ){
+  //     nextBranchArray.push(activebranchArray[i]);
+  //   }
+  //   nextBranchArray.push(activebranchArray[currentDepth]);
+  // }
+  // nextBranch = nextBranchArray.join();
 };
 
 Cell.prototype.updateImage = function(){
@@ -166,10 +179,15 @@ Cell.prototype.updateImage = function(){
   this.$div.append($image);
 };
 
+const trimBranch = function(){
+  for()
+}
+
 const gameLoop = function(clickedCellid){
   if(!gameOver){
     cellObj = cellObjs[clickedCellid];
     cellObj.wasClicked();
+    trimBranch();
   }else {
     //Suggest Reset. Or just alert an obnoxious message.
   }
