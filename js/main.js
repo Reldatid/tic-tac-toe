@@ -13,6 +13,8 @@ let twigArray = [];
 
 let $layerSelect;
 let $newBoardButton;
+let $litCells = [];
+let hue = 0;
 
 const makeBoard = function(layers){
   treeTop = new Cell('none', '0', '00', layers);
@@ -23,7 +25,6 @@ const makeBoard = function(layers){
   makeCellsFor(treeTop, '0', layers);
   let $container = $('#gameContainer');
   $container.append(treeTop.$div);
-  // treeTop.$grid.append($('<img src="images/tictactoeBoard.png" />'));
   treeTop.$div.attr('class', 'topBoard');
 }
 
@@ -52,7 +53,7 @@ const Cell = function(parent, branch, coOrdinates, layer){
   this.$div.css({
     left: `${33.33*coOrdinates[0]}%`,
     top: `${33.33*coOrdinates[1]}%`,
-  })
+  });
 
   if (layer > 0){
     this.$grid = $("<div class='grid'>");
@@ -106,6 +107,11 @@ Cell.prototype.wasClicked = function(){
       twigArray = [];
       this.claimThis({ playerTurn: `${playerTurn}` });
       buildBranch();
+      for (let i = 0; i < $litCells.length; i ++){
+        $litCells[i].css('background-color', '');
+      }
+      highlightCell(treeTop, this.branch.substring(1), 'rgba(255,0,0,.5)');
+      highlightCell(treeTop, activeBranch.substring(1), 'rgba(0,255,0,.5)')
       playerTurn = (playerTurn === 'X') ? 'O' : 'X';
       $('#turnTeller').html(`${playerTurn}'s turn`);
     }
@@ -120,6 +126,7 @@ Cell.prototype.claimThis = function(claimer){
     this.claimCascade();
     this.addToTwig();
   } else {
+    console.log(`${claimer} WINS!`);
     winner = claimer;
     gameOver = true;
   }
@@ -139,7 +146,6 @@ Cell.prototype.checkForWin = function(coOrds){
   const x = parseInt(coOrds[0]);
   const y = parseInt(coOrds[1]);
   const claims = this.playerClaims[`claimed${playerTurn}`];
-  console.log(claims);
   if (this.numberOfClaims < 9){
     if ( (claims[`x${x}`] === 3) || (claims[`y${y}`] === 3) || (claims.d1 === 3) || (claims.d2 === 3) ){
       this.claimThis(playerTurn);
@@ -191,7 +197,7 @@ const buildBranch = function(){
   nextBranch = clickedBranch.substring(0,twigBase) + twigArray.join('');
   // console.log(`nextBranch: ${nextBranch}`);
   activeBranch = trimBranch(treeTop, nextBranch.substring(1));
-}
+};
 
 const trimBranch = function(obj, branch){
   // console.log(obj.layer);
@@ -205,27 +211,46 @@ const trimBranch = function(obj, branch){
   } else {
     return trimBranch(obj.cells[branch[0]], branch.substring(1));
   }
-}
+};
 
 const gameLoop = function(clickedCellid){
   if(!gameOver){
     cellObj = cellObjs[clickedCellid];
     cellObj.wasClicked();
+    if(gameOver){
+      for (let i = 0; i < $litCells.length; i ++){
+        $litCells[i].css('background-color', '');
+      }
+      let celebrate = setInterval(function(){
+        const colour = `hsl(${hue}, 100%, 50%)`;
+        hue ++;
+        treeTop.$div.css('background-color' , `${colour}`);
+      }, 5);
+    }
   }else {
     //Suggest Reset. Or just alert an obnoxious message.
   }
-}
+};
 
-//give treeTop and branch without initial 0.
+//Use: give treeTop as obj, and the branch without initial 0.
 const claimBranch = function(obj, branchTop){
-  console.log(obj);
-  console.log(branchTop);
   if ( branchTop.length === 0 ){
     obj.claimThis({O: 'O'});
   } else {
     claimBranch(obj.cells[branchTop[0]], branchTop.substring(1));
   }
-}
+};
+
+const highlightCell = function(obj, branch, color){
+  if (branch.length === 0){
+    obj.$div.css('background-color' , `${color}`);
+    $litCells.push(obj.$div);
+  }else{
+    highlightCell(obj.cells[branch[0]], branch.substring(1), color);
+  }
+};
+
+const
 
 tree = {
   cells: {},
@@ -238,8 +263,8 @@ $(document).ready(function(){
   $newBoardButton = $('#makeNewBoard')
   $newBoardButton.on('click', function(){
     layers = parseInt($layerSelect.val());
-    console.log(layers);
     $('.topBoard').remove();
     makeBoard(layers);
+    clearInterval(celebrate);
   });
 });
