@@ -1,5 +1,5 @@
 console.log('hoy');
-const layers = 1;
+const layers = 3;
 const cellObjs = [];
 let playerTurn = 'O';
 let winner = 'none';
@@ -16,7 +16,8 @@ const makeBoard = function(){
   makeCellsFor(treeTop, '0', layers);
   let $container = $('#gameContainer');
   $container.append(treeTop.$div);
-  tree.$grid.append($('<img src="images/tictactoeBoard.png" />'));
+  // treeTop.$grid.append($('<img src="images/tictactoeBoard.png" />'));
+  treeTop.$div.attr('class', 'topBoard');
 }
 
 //Inititalise branch as 0, and layers as the number of times to nest. layers > 1.
@@ -94,10 +95,11 @@ Cell.prototype.wasClicked = function(){
     console.log("This cell has already been claimed.");
   }else{
     if (this.branch.substring(0, activeBranch.length) === activeBranch){
-      console.log('');
       clickedBranch = this.branch;
       twigArray = [];
-      this.claimThis(playerTurn);
+      this.claimThis({
+        playerTurn: `${playerTurn}`,
+      });
       buildBranch();
       playerTurn = (playerTurn === 'X') ? 'O' : 'X';
     }
@@ -105,6 +107,7 @@ Cell.prototype.wasClicked = function(){
 }
 
 Cell.prototype.claimThis = function(claimer){
+  console.log(claimer);
   this.claimer = claimer;
   if(this.parent !== 'none'){
     this.parent.trackClaims(this.coOrds, claimer);
@@ -116,13 +119,12 @@ Cell.prototype.claimThis = function(claimer){
     gameOver = true;
   }
   this.updateImage();
-  console.log(`${this.branch}: ${this.claimer}`);
 };
 
 Cell.prototype.claimCascade = function () {
   if(this.layer !== 0){
     for (let key in this.cells){
-      this.cells[key].claimer = 'O';
+      this.cells[key].claimer = this.claimer;
       this.cells[key].claimCascade();
     }
   }
@@ -132,33 +134,36 @@ Cell.prototype.checkForWin = function(coOrds){
   const x = parseInt(coOrds[0]);
   const y = parseInt(coOrds[1]);
   const claims = this.playerClaims[`claimed${playerTurn}`];
+  console.log(this.numberOfClaims);
   if (this.numberOfClaims < 9){
     if ( (claims[`x${x}`] === 3) || (claims[`y${y}`] === 3) || (claims.d1 === 3) || (claims.d2 === 3) ){
-      this.claimThis(playerTurn);
+      this.claimThis({O});
       return;
     }
   }else{
-    this.claimThis('O');
-    this.claimThis('X');
-    this.claimer = 'both';
+    this.claimThis({O:'O', X:'X'});
   }
 };
 
 Cell.prototype.trackClaims = function(coOrds, claimer){
-  claims = this.playerClaims[`claimed${claimer}`];
+  this.numberOfClaims ++;
   const x = parseInt(coOrds[0]);
   const y = parseInt(coOrds[1]);
-  claims[`x${x}`] ++;
-  claims[`y${y}`] ++;
-  if( (x+y)%2 === 0 ){
-    if( x === y ){
-      claims.d1 ++;
-    }
-    if(x+y === 2)
-    {
-      claims.d2 ++;
+  for( let key in this.claimer){
+    let claims = this.playerClaims[`claimed${claimer[key]}`];
+    claims[`x${x}`] ++;
+    claims[`y${y}`] ++;
+    if( (x+y)%2 === 0 ){
+      if( x === y ){
+        claims.d1 ++;
+      }
+      if(x+y === 2)
+      {
+        claims.d2 ++;
+      }
     }
   }
+  console.log(this.numberOfClaims);
 };
 
 Cell.prototype.addToTwig = function(){
@@ -168,15 +173,11 @@ Cell.prototype.addToTwig = function(){
 };
 
 Cell.prototype.updateImage = function(){
-  if (this.claimer === 'both'){
-    $image = $(`<img src="images/O.png" />`);
+  for (let key in this.claimer){
+    console.log(this.claimer);
+    $image = $(`<img src="images/${this.claimer[key]}.png" />`);
     this.$div.append($image);
-    $image = $(`<img src="images/X.png" />`);
-    this.$div.append($image);
-    return;
   }
-  $image = $(`<img src="images/${this.claimer}.png" />`);
-  this.$div.append($image);
 };
 
 const buildBranch = function(){
@@ -187,14 +188,13 @@ const buildBranch = function(){
   nextBranch = clickedBranch.substring(0,twigBase) + twigArray.join('');
   // console.log(`nextBranch: ${nextBranch}`);
   activeBranch = trimBranch(treeTop, nextBranch.substring(1));
-  console.log(`Next Active: ${activeBranch}`);
 }
 
 const trimBranch = function(obj, branch){
-  console.log(obj.layer);
-  console.log(`Obj Branch: ${obj.branch}`);
-  console.log(`Branch: ${branch}`);
-  console.log(`Claimer: ${obj.claimer}`);
+  // console.log(obj.layer);
+  // console.log(`Obj Branch: ${obj.branch}`);
+  // console.log(`Branch: ${branch}`);
+  // console.log(`Claimer: ${obj.claimer}`);
   if (obj.claimer) {
     return obj.branch.substring(0, obj.branch.length-1);
   } else if (branch.length < 1){
