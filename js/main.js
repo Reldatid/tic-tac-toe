@@ -14,6 +14,7 @@ let twigArray = [];
 let $layerSelect;
 let $newBoardButton;
 let $litCells = [];
+let celebrate;
 let hue = 0;
 
 const makeBoard = function(layers){
@@ -223,7 +224,7 @@ const gameLoop = function(clickedCellid){
       for (let i = 0; i < $litCells.length; i ++){
         $litCells[i].css('background-color', '');
       }
-      let celebrate = setInterval(function(){
+      celebrate = setInterval(function(){
         const colour = `hsl(${hue}, 100%, 50%)`;
         hue ++;
         treeTop.$div.css('background-color' , `${colour}`);
