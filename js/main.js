@@ -1,5 +1,5 @@
 console.log('hoy');
-const layers = 3;
+const layers = 4;
 const cellObjs = [];
 let playerTurn = 'O';
 let winner = 'none';
@@ -97,9 +97,7 @@ Cell.prototype.wasClicked = function(){
     if (this.branch.substring(0, activeBranch.length) === activeBranch){
       clickedBranch = this.branch;
       twigArray = [];
-      this.claimThis({
-        playerTurn: `${playerTurn}`,
-      });
+      this.claimThis({ playerTurn: `${playerTurn}` });
       buildBranch();
       playerTurn = (playerTurn === 'X') ? 'O' : 'X';
     }
@@ -107,7 +105,6 @@ Cell.prototype.wasClicked = function(){
 }
 
 Cell.prototype.claimThis = function(claimer){
-  console.log(claimer);
   this.claimer = claimer;
   if(this.parent !== 'none'){
     this.parent.trackClaims(this.coOrds, claimer);
@@ -134,10 +131,10 @@ Cell.prototype.checkForWin = function(coOrds){
   const x = parseInt(coOrds[0]);
   const y = parseInt(coOrds[1]);
   const claims = this.playerClaims[`claimed${playerTurn}`];
-  console.log(this.numberOfClaims);
+  console.log(claims);
   if (this.numberOfClaims < 9){
     if ( (claims[`x${x}`] === 3) || (claims[`y${y}`] === 3) || (claims.d1 === 3) || (claims.d2 === 3) ){
-      this.claimThis({O});
+      this.claimThis(playerTurn);
       return;
     }
   }else{
@@ -149,7 +146,7 @@ Cell.prototype.trackClaims = function(coOrds, claimer){
   this.numberOfClaims ++;
   const x = parseInt(coOrds[0]);
   const y = parseInt(coOrds[1]);
-  for( let key in this.claimer){
+  for( let key in claimer){
     let claims = this.playerClaims[`claimed${claimer[key]}`];
     claims[`x${x}`] ++;
     claims[`y${y}`] ++;
@@ -163,7 +160,6 @@ Cell.prototype.trackClaims = function(coOrds, claimer){
       }
     }
   }
-  console.log(this.numberOfClaims);
 };
 
 Cell.prototype.addToTwig = function(){
@@ -174,7 +170,6 @@ Cell.prototype.addToTwig = function(){
 
 Cell.prototype.updateImage = function(){
   for (let key in this.claimer){
-    console.log(this.claimer);
     $image = $(`<img src="images/${this.claimer[key]}.png" />`);
     this.$div.append($image);
   }
@@ -210,6 +205,17 @@ const gameLoop = function(clickedCellid){
     cellObj.wasClicked();
   }else {
     //Suggest Reset. Or just alert an obnoxious message.
+  }
+}
+
+//give treeTop and branch without initial 0.
+const claimBranch = function(obj, branchTop){
+  console.log(obj);
+  console.log(branchTop);
+  if ( branchTop.length === 0 ){
+    obj.claimThis({O: 'O'});
+  } else {
+    claimBranch(obj.cells[branchTop[0]], branchTop.substring(1));
   }
 }
 

@@ -62,8 +62,9 @@ img{
 
 #gameContainer{
   position: relative;
-  width: 500px;
-  height: 500px;
+  border: 3px solid black;
+  width: 70vmin;
+  height: 70vmin;
   z-index: -50;
   margin: 10px auto;
 }
