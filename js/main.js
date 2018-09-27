@@ -1,18 +1,21 @@
 console.log('hoy');
-const layers = 2;
+const layers = 1;
 const cellObjs = [];
-let activeBranch = '0';
-let nextBranch = '0';
-let treeTop;
 let playerTurn = 'O';
 let winner = 'none';
 let gameOver = false;
 
+let treeTop;
+let activeBranch = '0';
+let nextBranch = '0';
+let clickedBranch;
+let twigArray = [];
+
 const makeBoard = function(){
-  treeTop = new Cell('none', 0, '00', layers)
+  treeTop = new Cell('none', '0', '00', layers);
   makeCellsFor(treeTop, '0', layers);
   let $container = $('#gameContainer');
-  $container.append(treeTop.$grid);
+  $container.append(treeTop.$div);
   tree.$grid.append($('<img src="images/tictactoeBoard.png" />'));
 }
 
@@ -90,9 +93,14 @@ Cell.prototype.wasClicked = function(){
   if (this.claimer){
     console.log("This cell has already been claimed.");
   }else{
-    // if (this.branch.substring(0, activeBranch.length) === activeBranch){
+    if (this.branch.substring(0, activeBranch.length) === activeBranch){
+      console.log('');
+      clickedBranch = this.branch;
+      twigArray = [];
       this.claimThis(playerTurn);
-    //}
+      buildBranch();
+      playerTurn = (playerTurn === 'X') ? 'O' : 'X';
+    }
   }
 }
 
@@ -102,12 +110,13 @@ Cell.prototype.claimThis = function(claimer){
     this.parent.trackClaims(this.coOrds, claimer);
     this.parent.checkForWin(this.coOrds);
     this.claimCascade();
-    this.shiftBranch();
+    this.addToTwig();
   } else {
     winner = claimer;
     gameOver = true;
   }
   this.updateImage();
+  console.log(`${this.branch}: ${this.claimer}`);
 };
 
 Cell.prototype.claimCascade = function () {
@@ -152,19 +161,10 @@ Cell.prototype.trackClaims = function(coOrds, claimer){
   }
 };
 
-Cell.prototype.shiftBranch = function(){
-  // const layer = this.layer;
-  // const currentDepth = layers - this.layer;
-  // if(depth > 1){
-  //   const branchArray = this.branch.split('');
-  //   const activebranchArray = activeBranch.split('');
-  //   let nextBranchArray = [0];
-  //   for ( let i = 1; i < currentDepth-1 ; i++ ){
-  //     nextBranchArray.push(activebranchArray[i]);
-  //   }
-  //   nextBranchArray.push(activebranchArray[currentDepth]);
-  // }
-  // nextBranch = nextBranchArray.join();
+Cell.prototype.addToTwig = function(){
+  if( this.layer < layers - 1){
+    twigArray.push( this.branch[this.branch.length-1] );
+  }
 };
 
 Cell.prototype.updateImage = function(){
@@ -179,15 +179,35 @@ Cell.prototype.updateImage = function(){
   this.$div.append($image);
 };
 
-const trimBranch = function(){
-  for()
+const buildBranch = function(){
+  // console.log(`clickedBranch: ${clickedBranch}`);
+  // console.log(`Current Twig: ${twigArray.join('')}`);
+  const clickedArr = clickedBranch.split('');
+  const twigBase = clickedBranch.length - twigArray.length - 1;
+  nextBranch = clickedBranch.substring(0,twigBase) + twigArray.join('');
+  // console.log(`nextBranch: ${nextBranch}`);
+  activeBranch = trimBranch(treeTop, nextBranch.substring(1));
+  console.log(`Next Active: ${activeBranch}`);
+}
+
+const trimBranch = function(obj, branch){
+  console.log(obj.layer);
+  console.log(`Obj Branch: ${obj.branch}`);
+  console.log(`Branch: ${branch}`);
+  console.log(`Claimer: ${obj.claimer}`);
+  if (obj.claimer) {
+    return obj.branch.substring(0, obj.branch.length-1);
+  } else if (branch.length < 1){
+    return nextBranch;
+  } else {
+    return trimBranch(obj.cells[branch[0]], branch.substring(1));
+  }
 }
 
 const gameLoop = function(clickedCellid){
   if(!gameOver){
     cellObj = cellObjs[clickedCellid];
     cellObj.wasClicked();
-    trimBranch();
   }else {
     //Suggest Reset. Or just alert an obnoxious message.
   }
