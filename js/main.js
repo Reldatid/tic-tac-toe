@@ -110,8 +110,10 @@ Cell.prototype.wasClicked = function(){
       for (let i = 0; i < $litCells.length; i ++){
         $litCells[i].css('background-color', '');
       }
-      highlightCell(treeTop, this.branch.substring(1), 'rgba(255,0,0,.5)');
-      highlightCell(treeTop, activeBranch.substring(1), 'rgba(0,255,0,.5)')
+      if(layers > 1){
+        highlightCell(treeTop, this.branch.substring(1), 'rgba(255,0,0,.5)');
+        highlightCell(treeTop, activeBranch.substring(1), 'rgba(0,255,0,.5)');
+      }
       playerTurn = (playerTurn === 'X') ? 'O' : 'X';
       $('#turnTeller').html(`${playerTurn}'s turn`);
     }
