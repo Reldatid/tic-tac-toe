@@ -1,18 +1,25 @@
 console.log('hoy');
-const layers = 4;
 const cellObjs = [];
 let playerTurn = 'O';
 let winner = 'none';
 let gameOver = false;
 
+let layers = 2;
 let treeTop;
 let activeBranch = '0';
 let nextBranch = '0';
 let clickedBranch;
 let twigArray = [];
 
-const makeBoard = function(){
+let $layerSelect;
+let $newBoardButton;
+
+const makeBoard = function(layers){
   treeTop = new Cell('none', '0', '00', layers);
+  activeBranch = '0';
+  gameOver = false;
+  winner = 'none';
+  playerTurn = 'O';
   makeCellsFor(treeTop, '0', layers);
   let $container = $('#gameContainer');
   $container.append(treeTop.$div);
@@ -100,6 +107,7 @@ Cell.prototype.wasClicked = function(){
       this.claimThis({ playerTurn: `${playerTurn}` });
       buildBranch();
       playerTurn = (playerTurn === 'X') ? 'O' : 'X';
+      $('#turnTeller').html(`${playerTurn}'s turn`);
     }
   }
 }
@@ -225,5 +233,13 @@ tree = {
 };
 
 $(document).ready(function(){
-  makeBoard();
+  makeBoard(layers);
+  $layerSelect = $('#layers')
+  $newBoardButton = $('#makeNewBoard')
+  $newBoardButton.on('click', function(){
+    layers = parseInt($layerSelect.val());
+    console.log(layers);
+    $('.topBoard').remove();
+    makeBoard(layers);
+  });
 });
