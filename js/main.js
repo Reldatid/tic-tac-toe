@@ -116,7 +116,8 @@ Cell.prototype.wasClicked = function(){
         highlightCell(treeTop, activeBranch.substring(1), 'rgba(0,255,0,.5)');
       }
       playerTurn = (playerTurn === 'X') ? 'O' : 'X';
-      $('#turnTeller').html(`${playerTurn}'s turn`);
+      console.log($('#turnTeller img'));
+      $('#turnTeller img').attr('src', `images/${playerTurn}.png`);
     }
   }
 }
@@ -193,20 +194,13 @@ Cell.prototype.updateImage = function(){
 };
 
 const buildBranch = function(){
-  // console.log(`clickedBranch: ${clickedBranch}`);
-  // console.log(`Current Twig: ${twigArray.join('')}`);
   const clickedArr = clickedBranch.split('');
   const twigBase = clickedBranch.length - twigArray.length - 1;
   nextBranch = clickedBranch.substring(0,twigBase) + twigArray.join('');
-  // console.log(`nextBranch: ${nextBranch}`);
   activeBranch = trimBranch(treeTop, nextBranch.substring(1));
 };
 
 const trimBranch = function(obj, branch){
-  // console.log(obj.layer);
-  // console.log(`Obj Branch: ${obj.branch}`);
-  // console.log(`Branch: ${branch}`);
-  // console.log(`Claimer: ${obj.claimer}`);
   if (obj.claimer) {
     return obj.branch.substring(0, obj.branch.length-1);
   } else if (branch.length < 1){
