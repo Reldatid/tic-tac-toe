@@ -49,6 +49,7 @@ number of '>'s is importance.
 - >Undo perhaps? Better, clicking highlights a cell and there's a 'confirm move' button or something.
 - Options menu to change game rules.
 - Option: Single player against AI, Local 2 player, or online multiplayer.
+  - Option: Use the AI to pre-populate game board for the first X moves.
 - Option: A board is claimed as a tie as soon as no-one can win it.
 - Option: No bananas mode. Turns off win tracking for casual playing.
 - Idea:Option: Betting on what your opponents next move will be. Adds a meta-'mind-game' element where you can convince your opponents they are playing into your hands by doing what they expect.
